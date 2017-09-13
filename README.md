@@ -1,4 +1,4 @@
-# K8101
+﻿# K8101
 Communication with the Velleman's USB display board kit K8101
 
 ## Introduction ##
@@ -9,7 +9,7 @@ Once the display plugged to the computer, we can see that the display is seen as
 
 ## Technical info ##
 
-**Vendor ID**: 10cf / **Device ID**: 8101
+**Vendor ID**: 0x10cf / **Device ID**: 0x8101
 
 ### Structure of a command ###
 
@@ -24,11 +24,13 @@ Each command is made of several bytes:
 
 [^1]: This applies to all but 4 commands. Seems to be a bug in the PIC size
 
-Computation of the checksum: perform sum( command bytes not including start & stop bytes) modulo 256.
+Computation of the checksum: 
+  * perform Σ( command bytes, not including start & stop) modulo 256
+  * when the sum is incorrect, the display shows "CHKSM"
 
 | Function         | LSB(size) | MSB(size) | ID     | Additional data             |
 |------------------|:---------:|:---------:|--------|-----------------------------|
-| Backlight        | 7         | 0         | 20     | 0-254 seconds 255=permanent |
+| Backlight        | 7         | 0         | 20     | 0-254=seconds 255=permanent |
 | Beep             | 7         | 0         | 6      | count                       |
 | Clear all        | 6         | 0         | 2      | n/a                         |
 | Clear foreground | 6         | 0         | 3      | n/a                         |
@@ -44,6 +46,7 @@ Computation of the checksum: perform sum( command bytes not including start & st
 | Draw text        | LSB size  | MSB size  | 4=big 5=small      | x1 y1 max_width strZ |
 
 [^2]: these 4 commands show an incorrect message size. This might be a bug in the PIC program.
+
 [^3]: the bitmap is stored locally in the display memory and can be redisplayed without transfer with the "Clear foreground" command. It can be used as a background picture.
 
 ### Character set ###
