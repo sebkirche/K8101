@@ -5,7 +5,7 @@ Communication with the Velleman's USB display board kit K8101
 
 The kit is shipped with several example programs with source code, but the communication with the display is only avaliable as a precompiled .Net library. Reverse-engineering was necessary to retrieve the dedicated binary protocol understood by the on-board PIC 18F controller.
 
-Once the display plugged to the computer, we can see that the display is seen as a Communication Device Class (like a modem) and a corresponding tty is created (automatically with GNU/Linux and MacOS X, and after use of a .inf to associate the display with the usbser.sys device driver on Windows).
+Once the display plugged to the computer, we can see that the display is seen as a Communication Device Class (like a modem) and a corresponding tty is created (automatically with GNU/Linux and MacOS X, and after use of a .inf to associate the display with the usbser.sys device driver on Windows through a COM port). You can send data via USB protocol, or simply via the tty/COM.
 
 ## Technical info ##
 
@@ -35,10 +35,10 @@ Computation of the checksum:
 | Clear all        | 6         | 0         | 2      | n/a                         |
 | Clear foreground | 6         | 0         | 3      | n/a                         |
 | Contrast         | 7         | 0         | 17     | 0-63                        |
-| Draw Line        | 16 [^2]   | 0         | 18     | x1 y1 x2 y2                 |
+| Draw line        | 16 [^2]   | 0         | 18     | x1 y1 x2 y2                 |
 | Draw pixel       | 8         | 0         | 9      | x1 y1                       |
 | Draw rectangle   | 16 [^2]   | 0         | 7      | x1 y1 width height          |
-| Erase Line       | 16 [^2]   | 0         | 19     | x1 y1 x2 y2                 |
+| Erase line       | 16 [^2]   | 0         | 19     | x1 y1 x2 y2                 |
 | Erase pixel      | 8         | 0         | 16     | x1 y1                       |
 | Erase rectangle  | 16 [^2]   | 0         | 8      | x1 y1 width height          |
 | Invert display   | 7         | 0         | 21     | 0=normal 1=inverted         |
@@ -64,8 +64,8 @@ Computation of the checksum:
 128 x 64 monochrome pixels result in a buffer of 8192 bits = 1KB.
 
 The 1024 bytes buffer to send a bitmap has a weird layout, maybe due to the (unidentified) LCD display:
-  * the screen is made of 8 horizontal bands of 8 pixels, first on top
-  * for each band, one byte describe a column of 8 pixels, the most significant bit being the bottom of the column
+  * the screen is divided in 8 horizontal bands of 8 pixels high each, first band on top
+  * for each band, there is 128 bytes, one byte describe a column of 8 pixels, the most significant bit being the bottom of the column
 
         Byte 0               Byte 127
         LSB = (0,0)          LSB = (127,0)
