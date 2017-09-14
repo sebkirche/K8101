@@ -16,7 +16,7 @@ Once the display is plugged to the computer, we can see that the display is seen
 Each command is made of several bytes:
   * starting delimiter 0xAA (170)
   * lowest significant byte of the command size[^1]
-  * highest significant by of the command size
+  * highest significant byte of the command size
   * command ID
   * (possibly empty) list of additional bytes depending on the command
   * checksum
