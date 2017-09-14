@@ -42,12 +42,14 @@ Computation of the checksum:
 | Erase pixel      | 8         | 0         | 16     | x1 y1                       |
 | Erase rectangle  | 16 [^2]   | 0         | 8      | x1 y1 width height          |
 | Invert display   | 7         | 0         | 21     | 0=normal 1=inverted         |
-| Draw bitmap[^3]  | 6         | 4         | 1      | 1024 bytes - cf bitmap layout |
-| Draw text        | LSB size  | MSB size  | 4=big 5=small      | x1 y1 max_width strZ |
+| Draw bitmap[^3]  | 6         | 4         | 1      | 1024 bytes + 1[^4] - cf bitmap layout |
+| Draw text        | LSB size  | MSB size  | 4=big 5=small      | x1 y1 max_width str + 1[^4] |
 
 [^2]: these 4 commands show an incorrect message size. This might be a bug in the PIC program.
 
 [^3]: the bitmap is stored locally in the display memory and can be redisplayed without transfer with the "Clear foreground" command. It can be used as a background picture.
+
+[^4]: for these 2 commands the actual data (text or 1024 bytes of bitmap) must be followed by an extra 0 - that is *not* counted in the size (!). Code smell in PIC side...
 
 ### Character set ###
 
