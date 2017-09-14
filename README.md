@@ -5,7 +5,7 @@ Communication with the Velleman's USB display board kit K8101
 
 The kit is shipped with several example programs with source code, but the communication with the display is only avaliable as a precompiled .Net library. Reverse-engineering was necessary to retrieve the dedicated binary protocol understood by the on-board PIC 18F controller.
 
-Once the display plugged to the computer, we can see that the display is seen as a Communication Device Class (like a modem) and a corresponding tty is created (automatically with GNU/Linux and MacOS X, and after use of a .inf to associate the display with the usbser.sys device driver on Windows through a COM port). You can send data via USB protocol, or simply via the tty/COM.
+Once the display is plugged to the computer, we can see that the display is seen as a Communication Device (CDC - like a modem) and a corresponding tty is created (automatically with GNU/Linux and MacOS X, and after use of a .inf to associate the display with the usbser.sys device driver on Windows through a COM port). You can then send data via USB protocol, or simply via the tty/COM.
 
 ## Technical info ##
 
@@ -20,12 +20,12 @@ Each command is made of several bytes:
   * command ID
   * (possibly empty) list of additional bytes depending on the command
   * checksum
-  * stoping delimiter 0x55 (85)
+  * stopping delimiter 0x55 (85)
 
 [^1]: This applies to all but 4 commands. Seems to be a bug in the PIC size
 
 Computation of the checksum: 
-  * perform Σ( command bytes, not including start & stop) modulo 256
+  * perform Σ( size + command + params bytes, not including start & stop) modulo 256
   * when the sum is incorrect, the display shows "CHKSM"
 
 | Function         | LSB(size) | MSB(size) | ID     | Additional data             |
@@ -101,3 +101,8 @@ The 1024 bytes buffer to send a bitmap has a weird layout, maybe due to the (uni
         .                    .
         MSB = (0,63)         MSB = (127,63)
         
+### Notifications of buttons ###
+
+The display is able to notify the press of the button to the computer.
+  * Short press will send `FF 05 AA 04 00`
+  * Long press will send `FF 05 AA AF 00`
