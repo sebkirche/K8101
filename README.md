@@ -22,7 +22,7 @@ Each command is made of several bytes:
   * checksum
   * stopping delimiter 0x55 (85)
 
-[^1]: This applies to all but 4 commands. Seems to be a bug in the PIC size
+[^1]: This applies to all but 4 commands. Seems to be a bug in the PIC side
 
 Computation of the checksum: 
   * perform Σ( size + command + params bytes, not including start & stop) modulo 256
