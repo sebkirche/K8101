@@ -85,7 +85,7 @@ The 1024 bytes buffer to send a bitmap has a weird layout, maybe due to the (uni
         .                    .
         .                    .
         .                    .
-        MSB = (0,7)          MSB = (127,7)
+        MSB = (0,15)          MSB = (127,15)
         ----------------------------------
         bands 3 to 7
         ----------------------------------
