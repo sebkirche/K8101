@@ -25,6 +25,8 @@ Each command is made of several bytes:
 Computation of the checksum: 
   * perform Σ( size + command + params bytes, not including start & stop) modulo 256
   * when the sum is incorrect, the display shows "CHKSM"
+  
+### List of commands ###
 
 | Function         | LSB(size) | MSB(size) | CMD ID | Additional data             |
 |------------------|:---------:|:---------:|--------|-----------------------------|
@@ -42,6 +44,8 @@ Computation of the checksum:
 | Invert display   | 7         | 0         | 21     | `<invert>` 0=normal 1=inverted         |
 | Draw bitmap[^2]  | 6         | 4         | 1      | 1024 bytes + 1[^3] - cf bitmap layout |
 | Draw text        | LSB size  | MSB size  | 4=big 5=small | `<x1>` `<y1>` `<max_width>` `<string_bytes + 1>`[^3] |
+
+Note: we can see a hole in the commands list. 10, 11, 12, 13, 14, 15 seem unused.
 
 [^1]: these 4 commands need an incorrect message size. This might be a bug in the PIC program.
 
