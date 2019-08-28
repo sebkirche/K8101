@@ -65,7 +65,7 @@ Note: we can see a hole in the commands list. 10, 11, 12, 13, 14, 15 seem unused
       V
     (0,63) -->  (127,63)
 
-128 x 64 monochrome pixels result in a buffer of 8192 bits = 1KB.
+128 x 64 monochrome pixels result in a buffer of 8192 bits = 1KiB.
 
 The 1024 bytes buffer to send a bitmap has a weird layout, maybe due to the (unidentified) LCD display:
   * the screen is divided in 8 horizontal bands of 8 pixels high each, first band on top
@@ -106,5 +106,5 @@ The 1024 bytes buffer to send a bitmap has a weird layout, maybe due to the (uni
 ### Notifications of buttons ###
 
 The display is able to notify the press of the button to the computer.
-  * Short press will send `FF 05 AA 04 00`
+  * Short press will send `FF 05 FF 04 00`
   * Long press will send `FF 05 AA AF 00`
