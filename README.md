@@ -30,14 +30,14 @@ Computation of the checksum:
 
 | Function         | LSB(size) | MSB(size) | CMD ID | Additional data             |
 |------------------|:---------:|:---------:|--------|-----------------------------|
-| Backlight        | 7         | 0         | 20 (14h)     | `<seconds>` 0-254=seconds 255=permanent |
-| Beep             | 7         | 0         | 6      | `<count>`                   |
+| Backlight timeout| 7         | 0         | 20 (14h)     | `<seconds>` 0-254=seconds 255=permanent |
+| Beep             | 7         | 0         | 6      | `<number_of_beeps>`                   |
 | Clear all        | 6         | 0         | 2      | n/a                         |
-| Clear foreground | 6         | 0         | 3      | n/a                         |
+| Clear foreground <br>(restore last loaded bitmap)| 6         | 0         | 3      | n/a                         |
 | Contrast         | 7         | 0         | 17 (11h)    | `<level>` 0-63              |
 | Draw line        | 16 [^1]   | 0         | 18 (12h)    | `<x1>` `<y1>` `<x2>` `<y2>`                 |
 | Draw pixel       | 8         | 0         | 9      | `<x1>` `<y1>`                       |
-| Draw plain rectangle   | 16 [^1]   | 0         | 7      | `<x1>` `<y1>` `<width>` `<height>`          |
+| Draw plain rectangle| 16 [^1]   | 0         | 7      | `<x1>` `<y1>` `<width>` `<height>`          |
 | Erase line       | 16 [^1]   | 0         | 19 (13h)    | `<x1>` `<y1>` `<x2>` `<y2>`                 |
 | Erase pixel      | 8         | 0         | 16 (10h)    | `<x1>` `<y1>`                       |
 | Erase rectangle  | 16 [^1]   | 0         | 8      | `<x1>` `<y1>` `<width>` `<height>`          |
