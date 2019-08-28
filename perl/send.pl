@@ -37,8 +37,8 @@ unless ($args[0]){
 
 open my $tty, ">$ttypath" or die $!;
 binmode $tty; #??
-select $tty;
-$|++;
+# select $tty;
+# $|++;
 select STDOUT;
 
 # additional experiment commands
@@ -129,7 +129,7 @@ sub make_cmd {
     
     my $c = pack('C*', $lsb, $msb, $cmds{$verb}->{c}, @args);
     $c = pack('C*', $BOC, unpack('C*', $c), checksum($c), $EOC);
-    printf "%s = %s\n", $verb, join(',', unpack("C*", $c));
+    printf "%s = %s\n", $verb, join(',', unpack("(H2)*", $c));
     return $c
 }
 
