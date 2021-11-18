@@ -45,7 +45,7 @@ Computation of the checksum:
 | Erase rectangle  | 16 [^1]   | 0         | 8      | `<x1>` `<y1>` `<width>` `<height>`          |
 | Invert display   | 7         | 0         | 21 (15h)    | `<invert>` 0=normal 1=inverted         |
 | Draw bitmap[^2]  | 6         | 4         | 1      | 1024 bytes + 1[^3] - cf bitmap layout |
-| Draw text        | LSB size  | MSB size  | 4=big / 5=small | `<x1>` `<y1>` `<max_width>` `<string_bytes + 1>`[^3] |
+| Draw text        | LSB size  | MSB size  | 4=big / 5=small | `<x1>` `<y1>` `<max_width>`[^4] `<string_bytes + 1>`[^3] |
 
 Note: we can see a "hole" in the commands list: 10, 11, 12, 13, 14, 15 seem unused.
 
@@ -54,6 +54,8 @@ Note: we can see a "hole" in the commands list: 10, 11, 12, 13, 14, 15 seem unus
 [^2]: the bitmap is stored locally in the display memory and can be redisplayed without transfer with the "Clear foreground" command. It can be used as a background picture.
 
 [^3]: for these 2 commands the actual data (text or 1024 bytes of bitmap) must be followed by an extra 0 - that is *not* counted in the size (!). Code smell in PIC side...
+
+[^4]: the max_width parameter is used to wrap text and has no effect if the text does not have spaces
 
 ### Character set ###
 

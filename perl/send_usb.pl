@@ -4,9 +4,11 @@ use strict;
 use warnings;
 use feature 'say';
 use Image::BMP;
+use USB::LibUSB;
 
 $|++;
 
+my $iface_number = 1;
 my $BOC = 0xAA;
 my $EOC = 0x55;
 
@@ -31,8 +33,7 @@ my %cmds = (
     clock      => {}
 );
 
-my $ttypath = shift or die "Usage: $0 <tty or COM> <command> [opts]\n";
-my @args = @ARGV;
+my @args = @ARGV;# or die "Usage: $0 <command> [opts]\n";
 
 unless ($args[0] && $args[0] ne 'help'){
 	print "Missing command name. Supported are\n";
@@ -45,11 +46,12 @@ unless ($args[0] && $args[0] ne 'help'){
     exit 1;
 }
 
-open my $tty, '+<', "$ttypath" or die $!;
-binmode $tty; #??
-# select $tty;
-# $|++;
-select STDOUT;
+my $tty;                        # dummy var
+# open my $tty, ">$ttypath" or die $!;
+# binmode $tty; #??
+# # select $tty;
+# # $|++;
+# select STDOUT;
 
 # additional experiment commands
 if($args[0] eq 'testbmp'){
@@ -61,7 +63,7 @@ if($args[0] eq 'testbmp'){
     my ($lsb, $msb) = get_data_size(\@b);
     my $c = make_raw_cmd($lsb, $msb, 1, @b, 0);
     send_cmd($tty, $c);
-    close $tty;
+    # close $tty;
     exit 0;
 } elsif($args[0] eq 'testbmpall'){
     # send all the bmp available in the working directory
@@ -73,24 +75,24 @@ if($args[0] eq 'testbmp'){
         # flush $tty;
     }
     printf "%d bitmap(s) sent to the display.\n", $cnt;
-    close $tty;
+    # close $tty;
     exit 0;
 } elsif($args[0] eq 'testtxt'){
     # send a dummy text in 2 sizes
     my $t1 = '4x8: Lorem Ipsum is simply dummy text of the printing and type- setting industry.';
     my $t2 = '6x8: Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s. !@#$%^&*?';
     send_cmd($tty, make_cmd('smalltext', $t1, 0, 0, 127));
-    flush $tty;
+    # flush $tty;
     send_cmd($tty, make_cmd('bigtext', $t2, 0, 24, 127));
-    close $tty;
+    # close $tty;
     exit 0;
 } elsif($args[0] eq 'testunk'){
     # send a unkown command not implemented by the dll
     # my @b = ( 12 );
     # my ($lsb, $msb) = get_data_size(\@b);
-    # my $c = make_raw_cmd($lsb, $msb, 1, @b);
+    # my $c = make_raw_cmd($lsb, $msb, 12, @b);
     # send_cmd($tty, $c);
-    close $tty;
+    # close $tty;
     exit 0;
 } elsif ($args[0] eq 'read'){
     eval { read_data() };
@@ -112,7 +114,7 @@ if($args[0] eq 'testbmp'){
 my $cmd;
 $cmd = make_cmd(@args);
 send_cmd($tty, $cmd);
-close $tty;
+# close $tty;
 
 # ---------- End of program ------------------
 
@@ -193,6 +195,7 @@ sub make_cmd {
     my $c = pack('C*', $BOC, unpack('C*', $data), $chk, $EOC);
     printf "%s = %s\n", $verb, join(',', unpack("(H2)*", $c));
     printf "size = %d (%x,%x) chk = %x\n", $size, $lsb, $msb, $chk;
+
     return $c
 }
 
@@ -284,17 +287,32 @@ sub checksum {
     return $r;
 }
 
-# send data to the tty
+# send data to the device
 sub send_cmd {
     my $t = shift;
     my $c = shift;
-    print $t $c;
-    flush $t;
+    # print $t $c;
+    # flush $t;
     #sleep 1;
+
+    my $ctx = USB::LibUSB->init();
+    my $handle = $ctx->open_device_with_vid_pid(0x10cf, 0x8101);
+    $handle->set_auto_detach_kernel_driver(1);
+    my $ret = $handle->claim_interface($iface_number);
+    die "claim_interface returned $ret" if $ret;
+    $handle->bulk_transfer_write(2, $c, length($c));
+    $handle->release_interface($iface_number);
+    $handle->close();
+    $ctx->exit();
 }
 
 sub read_data {
-    my $t = shift;
-    my $data = <$t>;
+    my $ctx = USB::LibUSB->init();
+    my $handle = $ctx->open_device_with_vid_pid(0x10cf, 0x8101);
+    my $ret = $handle->claim_interface($iface_number);
+    die "claim_interface returned $ret" if $ret;
+    my $data = $handle->bulk_transfer_read(130, 10, 10);
     say "read " . join(',', unpack("(H2)*", $data));
+    $handle->release_interface($iface_number);
+    $ctx->exit();
 }
