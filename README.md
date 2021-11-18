@@ -11,6 +11,8 @@ Once the display is plugged to the computer, we can see that the display is seen
 
 **Vendor ID**: 0x10cf / **Device ID**: 0x8101
 
+Serial communication: 9600 bauds, 8 bits data, 1 stop, no parity `stty -f /dev/tty.xxx 9600 cs8 -cstopb -parenb`
+
 ### Structure of a command ###
 
 Each command is made of several bytes:
@@ -75,7 +77,7 @@ The 1024 bytes buffer to send a bitmap has a weird layout, maybe due to the (uni
         LSB = (0,0)          LSB = (127,0)
         .                    .
         .                    .
-        .                    .
+        .            Band 1  .
         .                    .
         .                    .
         .                    .
@@ -85,19 +87,19 @@ The 1024 bytes buffer to send a bitmap has a weird layout, maybe due to the (uni
         LSB = (0,8)          LSB = (127,8)
         .                    .
         .                    .
-        .                    .
+        .            Band 2  .
         .                    .
         .                    .
         .                    .
         MSB = (0,15)          MSB = (127,15)
         ----------------------------------
-        bands 3 to 7
+                  Bands 3 to 7
         ----------------------------------
         Byte 896             Byte 1023
         LSB = (0,55)         LSB = (127,55)
         .                    .
         .                    .
-        .                    .
+        .            Band 8  .
         .                    .
         .                    .
         .                    .
