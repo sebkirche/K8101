@@ -5,13 +5,17 @@ Communication with the Velleman's USB display board kit K8101
 
 The kit is shipped with several example programs with source code, but the communication with the display is only available as a precompiled .Net library. Reverse-engineering was necessary to retrieve the dedicated binary protocol understood by the on-board PIC 18F controller.
 
-Once the display is plugged to the computer, we can see that the display is seen as a Communication Device (CDC - like a modem) and a corresponding tty is created (automatically with GNU/Linux and MacOS X, and after use of a .inf to associate the display with the usbser.sys device driver on Windows through a COM port). You can then send data ~~via USB protocol, or~~ simply via the tty/COM.
+Once the display is plugged to the computer, we can see that the display is seen as a Communication Device (CDC - like a modem) and a corresponding tty is created (automatically with GNU/Linux and MacOS X, and after use of a .inf to associate the display with the usbser.sys device driver on Windows through a COM port). You can then send data via USB protocol (with limitations, depending on the platform), or simply via the tty/COM.
+
+A reference implementation is made in Perl, in 2 versions:
+   * `send.pl` sends data via serial port
+   * `send_usb.pl` sends data via the USB and libusb binding
 
 ## Technical info ##
 
-**Vendor ID**: 0x10cf / **Device ID**: 0x8101
+USB: **Vendor ID** `0x10cf` (Microchip) / **Device ID** `0x8101`
 
-Serial communication: 9600 bauds, 8 bits data, 1 stop, no parity `stty -f /dev/tty.xxx 9600 cs8 -cstopb -parenb`
+Serial communication: 9600 bauds, 8 bits data, 1 stop, no parity e.g. `stty -f /dev/tty.xxx 9600 cs8 -cstopb -parenb`
 
 ### Structure of a command ###
 
@@ -26,7 +30,7 @@ Each command is made of several bytes:
 
 Computation of the checksum: 
   * perform Σ( size + command + params bytes, not including start & stop) modulo 256
-  * when the sum is incorrect, the display shows "CHKSM" (Note: if you notice that some of the commands are failing with a CHKSM, it may due to the tty output conversion settings - seen with Linux)
+  * when the sum is incorrect, the display shows `CHKSM` (Note: if you notice that some of the commands are failing with a `CHKSM`, it may due to the tty output conversion settings or communication speed - seen with Linux)
     
 ### List of commands ###
 
