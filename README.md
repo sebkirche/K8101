@@ -75,9 +75,11 @@ Note: we can see a "hole" in the commands list: 10, 11, 12, 13, 14, 15 seem unus
 
 128 x 64 monochrome pixels result in a buffer of 8192 bits = 1KiB.
 
-The 1024 bytes buffer to send a bitmap has a weird layout, maybe due to the (unidentified) LCD display:
+The 1024 bytes buffer to send a bitmap has a weird layout, LCD display is not identified:
   * the screen is divided in 8 horizontal bands of 8 pixels high each, first band on top
-  * for each band, there is 128 bytes, one byte describe a column of 8 pixels, the most significant bit being the bottom of the column
+  * for each band, there is 128 bytes, one byte describe a column of 8 pixels, starting from the left, the most significant bit being the bottom of the column
+  
+Someone suggested that the LCD matrix is simply text-oriented.
 
         Byte 0               Byte 127
         LSB = (0,0)          LSB = (127,0)
