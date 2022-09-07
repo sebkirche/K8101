@@ -19,7 +19,7 @@ Serial communication: 9600 bauds, 8 bits data, 1 stop, no parity e.g. `stty -f /
 
 ### Structure of a command ###
 
-Each command is made of several bytes:
+Each command is made of several bytes: `[AA][size.LSB][size.MSB][CMD][...][CHK][55]`
   * starting delimiter 0xAA (170)
   * lowest significant byte of the command total size
   * highest significant byte of the command total size
@@ -43,7 +43,7 @@ Computation of the checksum:
 | Contrast         | 7         | 0         | 17 (11h)    | `<level>` 0-63              |
 | Draw line        | 16 [^1]   | 0         | 18 (12h)    | `<x1>` `<y1>` `<x2>` `<y2>`                 |
 | Draw pixel       | 8         | 0         | 9      | `<x1>` `<y1>`                       |
-| Draw plain rectangle| 16 [^1]   | 0         | 7      | `<x1>` `<y1>` `<width>` `<height>`          |
+| Draw plain rectangle| 16 [^1]| 0         | 7      | `<x1>` `<y1>` `<width>` `<height>`          |
 | Erase line       | 16 [^1]   | 0         | 19 (13h)    | `<x1>` `<y1>` `<x2>` `<y2>`                 |
 | Erase pixel      | 8         | 0         | 16 (10h)    | `<x1>` `<y1>`                       |
 | Erase rectangle  | 16 [^1]   | 0         | 8      | `<x1>` `<y1>` `<width>` `<height>`          |
@@ -59,7 +59,7 @@ Note: we can see a "hole" in the commands list: 10, 11, 12, 13, 14, 15 seem unus
 
 [^3]: for these 2 commands the actual data (text or 1024 bytes of bitmap) must be followed by an extra 0 - that is *not* counted in the size (!). Code smell in PIC side...
 
-[^4]: the max_width parameter is used to wrap text and has no effect if the text does not have spaces
+[^4]: the max_width parameter is used to wrap text and has no effect if the text does not have spaces. I have noticed some weird rendering if the text begins with spaces, y is increased.
 
 ### Character set ###
 
