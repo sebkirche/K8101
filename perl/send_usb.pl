@@ -9,6 +9,9 @@ use USB::LibUSB;
 $|++;
 
 my $iface_number = 1;
+my $vendor = 0x10cf;
+my $product = 0x8101;
+my $endpoint = 2;
 my $BOC = 0xAA;
 my $EOC = 0x55;
 
@@ -296,23 +299,44 @@ sub send_cmd {
     #sleep 1;
 
     my $ctx = USB::LibUSB->init();
-    my $handle = $ctx->open_device_with_vid_pid(0x10cf, 0x8101);
-    $handle->set_auto_detach_kernel_driver(1);
-    my $ret = $handle->claim_interface($iface_number);
-    die "claim_interface returned $ret" if $ret;
-    $handle->bulk_transfer_write(2, $c, length($c));
-    $handle->release_interface($iface_number);
-    $handle->close();
+    my $handle = $ctx->open_device_with_vid_pid($vendor, $product);
+    if ($handle){
+        # $handle->set_auto_detach_kernel_driver(1);
+        my $detached = -1;
+        if ($handle->kernel_driver_active($iface_number)){
+            say "A kernel driver is active for interface, Detaching...";
+            $detached = $handle->detach_kernel_driver($iface_number);
+        } else {
+            say "No kernel driver active.";
+        }
+        my $ret = $handle->claim_interface($iface_number);
+        die "claim_interface returned $ret" if $ret;
+        $handle->bulk_transfer_write($endpoint, $c, length($c));
+        $handle->release_interface($iface_number);
+        if ($detached == 0){
+            say "Reattaching driver.";
+            $handle->attach_kernel_driver($iface_number);
+        }
+        $handle->close();
+    } else {
+        say STDERR "Unable to open K8101";
+    }
     $ctx->exit();
 }
 
 sub read_data {
     my $ctx = USB::LibUSB->init();
-    my $handle = $ctx->open_device_with_vid_pid(0x10cf, 0x8101);
+    my $handle = $ctx->open_device_with_vid_pid($vendor, $product);
     my $ret = $handle->claim_interface($iface_number);
     die "claim_interface returned $ret" if $ret;
     my $data = $handle->bulk_transfer_read(130, 10, 10);
+    my @bytes = unpack("C*", $data);
     say "read " . join(',', unpack("(H2)*", $data));
+    if ($bytes[2] == 0xff && $bytes[3] == 0x04){
+        say "-> short press";
+    } elsif ($bytes[2] == 0xaa && $bytes[3] == 0xaf){
+        say "-> long press";
+    }
     $handle->release_interface($iface_number);
     $ctx->exit();
 }

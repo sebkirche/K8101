@@ -1,21 +1,61 @@
-﻿# K8101
+﻿# K8101 #
 Communication with the Velleman's USB display board kit K8101
 
 ## Introduction ##
 
 The kit is shipped with several example programs with source code, but the communication with the display is only available as a precompiled .Net library. Reverse-engineering was necessary to retrieve the dedicated binary protocol understood by the on-board PIC 18F controller.
 
-Once the display is plugged to the computer, we can see that the display is seen as a Communication Device (CDC - like a modem) and a corresponding tty is created (automatically with GNU/Linux and MacOS X, and after use of a .inf to associate the display with the usbser.sys device driver on Windows through a COM port). You can then send data via USB protocol (with limitations, depending on the platform), or simply via the tty/COM.
+Once the board is plugged to the computer, we can see that it is seen as a Communication Device (CDC - like a serial port) and a corresponding tty is created (automatically with GNU/Linux and MacOS X, and after use of a .inf to associate the display with the usbser.sys device driver on Windows through a COM port). You can then send data via USB protocol (with limitations, depending on the platform), or simply via the tty/COM.
+
+On some platforms, you can also access the CDC device via LibUSB.
+
+## Linux ##
+
+On Linux, the device appears as `/dev/ttyACM0`.
+
+Serial communication: 9600 bauds, 8 bits data, 1 stop, no parity e.g. `stty -f /dev/tty.xxx 9600 cs8 -cstopb -parenb`
+
+### Serial test ###
+
+* the following test command should clear the screen: `echo 'clear all' && echo -ne '\xaa\06\00\02\x0a\x55' >/dev/ttyACM01`
+* the following test command should clear the screen: `echo 'beep 2' && echo -ne '\xaa\07\00\06\x02\x0f\x55' >/dev/ttyACM0`
+
+### USB ###
+
+* Access via LibUSB is supported, so the possibility to detach kernel drivers. You may have to call the script with root access, or play with udev to ensure write access to the corresponding `/dev/bus/usb/<bus_number>/<device_address>` device.
+
+## Mac OSX ##
+
+On my 10.13 the device appears as `/dev/tty.usbmodemFD121`.
+
+### Serial test ###
+
+* the following test command should clear the screen: `echo 'clear all' && echo -ne '\xaa\06\00\02\x0a\x55' >/dev/tty.usbmodemFD121`
+* the following test command should clear the screen: `echo 'beep 2' && echo -ne '\xaa\07\00\06\x02\x0f\x55' >/dev/tty.usbmodemFD121`
+
+### USB ###
+
+* Access via (Homebrew) LibUSB is supported, so the possibility to detach kernel drivers.
+
+## Windows ##
+
+On Windows it is managed by the driver usbser and it results in a new COM port. 
+
+My Windows 10 is configuring at 19200 bauds / 8 / 1 / No parity.
+
+### USB ###
+
+On windows, the CDC handling is provided via `usbser.sys` / `usbser.dll`. There should exist a way to make ignore the K8101 but I did not found it yet.
+
+## Code ##
 
 A reference implementation is made in Perl, in 2 versions:
    * `send.pl` sends data via serial port
-   * `send_usb.pl` sends data via the USB and libusb binding
+   * `send_usb.pl` is an attempt to implement an USB driver using libusb binding. Some issues may happen due to a lack of authorization to access the device.
 
 ## Technical info ##
 
 USB: **Vendor ID** `0x10cf` (Microchip) / **Device ID** `0x8101`
-
-Serial communication: 9600 bauds, 8 bits data, 1 stop, no parity e.g. `stty -f /dev/tty.xxx 9600 cs8 -cstopb -parenb`
 
 ### Structure of a command ###
 
@@ -59,7 +99,7 @@ Note: we can see a "hole" in the commands list: 10, 11, 12, 13, 14, 15 seem unus
 
 [^3]: for these 2 commands the actual data (text or 1024 bytes of bitmap) must be followed by an extra 0 - that is *not* counted in the size (!). Code smell in PIC side...
 
-[^4]: the max_width parameter is used to wrap text and has no effect if the text does not have spaces. I have noticed some weird rendering if the text begins with spaces, y is increased.
+[^4]: the max_width parameter is used to wrap text and has no effect if the text does not have spaces. I have noticed some weird rendering if the text begins with spaces, y is increased unexpectedly for each space.
 
 ### Character set ###
 
