@@ -1,5 +1,8 @@
 ﻿# K8101 #
+
 Communication with the Velleman's USB display board kit K8101
+
+![K8101](/docs/k8101.jpg?raw=true "K8101 Message Board")
 
 ## Introduction ##
 
