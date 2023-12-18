@@ -329,13 +329,21 @@ sub read_data {
     my $handle = $ctx->open_device_with_vid_pid($vendor, $product);
     my $ret = $handle->claim_interface($iface_number);
     die "claim_interface returned $ret" if $ret;
-    my $data = $handle->bulk_transfer_read(130, 10, 10);
-    my @bytes = unpack("C*", $data);
-    say "read " . join(',', unpack("(H2)*", $data));
-    if ($bytes[2] == 0xff && $bytes[3] == 0x04){
-        say "-> short press";
-    } elsif ($bytes[2] == 0xaa && $bytes[3] == 0xaf){
-        say "-> long press";
+    my $data = eval { $handle->bulk_transfer_read(130, 10, 10) };
+    if ($@) {
+        if ($@ =~ /timed out/){
+            say 'No pending event.';
+        } else {
+            say $@;
+        }
+    } else {
+        my @bytes = unpack("C*", $data);
+        say "read " . join(',', unpack("(H2)*", $data));
+        if ($bytes[2] == 0xff && $bytes[3] == 0x04){
+            say "-> short press";
+        } elsif ($bytes[2] == 0xaa && $bytes[3] == 0xaf){
+            say "-> long press";
+        }
     }
     $handle->release_interface($iface_number);
     $ctx->exit();
