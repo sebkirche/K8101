@@ -307,11 +307,14 @@ sub send_cmd {
             say "A kernel driver is active for interface, Detaching...";
             $detached = $handle->detach_kernel_driver($iface_number);
         } else {
-            say "No kernel driver active.";
+            # say "No kernel driver active.";
         }
         my $ret = $handle->claim_interface($iface_number);
         die "claim_interface returned $ret" if $ret;
+
+        # actual write
         $handle->bulk_transfer_write($endpoint, $c, length($c));
+        
         $handle->release_interface($iface_number);
         if ($detached == 0){
             say "Reattaching driver.";
@@ -327,24 +330,42 @@ sub send_cmd {
 sub read_data {
     my $ctx = USB::LibUSB->init();
     my $handle = $ctx->open_device_with_vid_pid($vendor, $product);
-    my $ret = $handle->claim_interface($iface_number);
-    die "claim_interface returned $ret" if $ret;
-    my $data = eval { $handle->bulk_transfer_read(130, 10, 10) };
-    if ($@) {
-        if ($@ =~ /timed out/){
-            say 'No pending event.';
+    if ($handle){
+        my $detached = -1;
+        if ($handle->kernel_driver_active($iface_number)){
+            say "A kernel driver is active for interface, Detaching...";
+            $detached = $handle->detach_kernel_driver($iface_number);
         } else {
-            say $@;
+            # say "No kernel driver active.";
         }
+        my $ret = $handle->claim_interface($iface_number);
+        die "claim_interface returned $ret" if $ret;
+        
+        # actual read
+        my $data = eval { $handle->bulk_transfer_read(130, 10, 10) };
+        if ($@) {
+            if ($@ =~ /timed out/){
+                say 'No pending event.';
+            } else {
+                say $@;
+            }
+        } else {
+            my @bytes = unpack("C*", $data);
+            say "read " . join(',', unpack("(H2)*", $data));
+            if ($bytes[2] == 0xff && $bytes[3] == 0x04){
+                say "-> short press";
+            } elsif ($bytes[2] == 0xaa && $bytes[3] == 0xaf){
+                say "-> long press";
+            }
+        }
+        $handle->release_interface($iface_number);
+        if ($detached == 0){
+            say "Reattaching driver.";
+            $handle->attach_kernel_driver($iface_number);
+        }
+        $handle->close();
     } else {
-        my @bytes = unpack("C*", $data);
-        say "read " . join(',', unpack("(H2)*", $data));
-        if ($bytes[2] == 0xff && $bytes[3] == 0x04){
-            say "-> short press";
-        } elsif ($bytes[2] == 0xaa && $bytes[3] == 0xaf){
-            say "-> long press";
-        }
+        say STDERR "Unable to open K8101";
     }
-    $handle->release_interface($iface_number);
     $ctx->exit();
 }
