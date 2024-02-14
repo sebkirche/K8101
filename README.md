@@ -6,7 +6,7 @@ Communication with the Velleman's USB display board kit K8101
 
 ## Introduction ##
 
-The kit is shipped with several example programs with source code, but the communication with the display is only available as a precompiled .Net library. Reverse-engineering was necessary to retrieve the dedicated binary protocol understood by the on-board PIC 18F controller.
+The kit is shipped with several example programs with source code, but the communication with the display is only available as a precompiled .Net library. Reverse-engineering was necessary to retrieve the dedicated binary protocol understood by the on-board PIC 18F27J53-ISP controller.
 
 Once the board is plugged to the computer, we can see that it is seen as a Communication Device (CDC - like a serial port) and a corresponding tty is created (automatically with GNU/Linux and MacOS X, and after use of a .inf to associate the display with the usbser.sys device driver on Windows through a COM port). You can then send data via USB protocol (with limitations, depending on the platform), or simply via the tty/COM.
 
