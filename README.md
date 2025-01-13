@@ -21,7 +21,7 @@ Serial communication: 9600 bauds, 8 bits data, 1 stop, no parity e.g. `stty -f /
 ### Serial test ###
 
 * the following test command should clear the screen: `echo 'clear all' && echo -ne '\xaa\06\00\02\x0a\x55' >/dev/ttyACM01`
-* the following test command should clear the screen: `echo 'beep 2' && echo -ne '\xaa\07\00\06\x02\x0f\x55' >/dev/ttyACM0`
+* the following test command should beep twice: `echo 'beep 2' && echo -ne '\xaa\07\00\06\x02\x0f\x55' >/dev/ttyACM0`
 
 ### USB ###
 
@@ -34,7 +34,7 @@ On my 10.13 the device appears as `/dev/tty.usbmodemFD121`.
 ### Serial test ###
 
 * the following test command should clear the screen: `echo 'clear all' && echo -ne '\xaa\06\00\02\x0a\x55' >/dev/tty.usbmodemFD121`
-* the following test command should clear the screen: `echo 'beep 2' && echo -ne '\xaa\07\00\06\x02\x0f\x55' >/dev/tty.usbmodemFD121`
+* the following test command should beep twice: `echo 'beep 2' && echo -ne '\xaa\07\00\06\x02\x0f\x55' >/dev/tty.usbmodemFD121`
 
 ### USB ###
 
